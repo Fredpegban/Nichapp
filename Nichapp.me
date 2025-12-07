@@ -1,0 +1,522 @@
+1. PROJECT OVERVIEW
+
+Build the Nichapp MVP, a storytelling + community platform for niche founders across Africa and the UK.
+Core actions:
+
+Founders create profiles
+
+Founders post stories (text + images)
+
+Supporters engage (likes, comments, follows)
+
+Discover page lists founders by niche and region
+
+Basic analytics (views, engagement)
+
+Admin moderation
+
+This MVP should be delivered with a Next.js + MongoDB + TailwindCSS stack.
+
+2. CORE MVP FEATURES (REQUIREMENTS)
+2.1 Authentication
+
+Register
+
+Login
+
+Logout
+
+JWT auth
+
+User roles: founder, supporter, admin
+
+2.2 Founder Profiles
+
+Fields:
+
+Founder name
+
+Brand name
+
+About founder
+
+Story highlights
+
+Niche category
+
+Region (Africa or UK)
+
+Links (Instagram, TikTok, etc.)
+
+Stats: storyCount, followerCount, profileViews
+
+Actions:
+
+Create profile
+
+Edit profile
+
+Public view profile
+
+2.3 Story Feed
+
+Founders post:
+
+Text
+
+Images (multiple)
+
+Niche tag
+
+Feed displays:
+
+Stories sorted by newest
+
+Likes
+
+Comments
+
+Views
+
+Users can:
+
+Like story
+
+Comment on story
+
+Follow founder
+
+2.4 Discover Page
+
+Users can filter founders by:
+
+Niche
+
+Region
+
+Trending
+
+Recently joined
+
+2.5 Analytics
+
+Track:
+
+Story views
+
+Profile views
+
+Display stats on:
+/me/analytics
+
+2.6 Admin Dashboard
+
+Admin can:
+
+View flagged stories
+
+Review reports
+
+Ban users
+
+Remove stories
+
+3. TECH STACK
+
+Frontend: Next.js 14 + TypeScript
+
+Backend: Next.js API routes
+
+Database: MongoDB (Mongoose)
+
+Auth: JWT + bcrypt
+
+Storage: Cloudinary for media uploads
+
+Styling: TailwindCSS
+
+Deployment: Vercel (frontend + APIs)
+
+4. FOLDER STRUCTURE
+nichapp/
+  pages/
+    index.tsx
+    feed.tsx
+    discover.tsx
+    founders/[id].tsx
+    stories/[id].tsx
+    auth/login.tsx
+    auth/register.tsx
+    me/profile.tsx
+    me/stories.tsx
+    me/analytics.tsx
+    admin/index.tsx
+  pages/api/
+    auth/
+      register.ts
+      login.ts
+      me.ts
+    founders/
+      index.ts
+      [id].ts
+    stories/
+      index.ts
+      [id].ts
+      [id]/
+        like.ts
+        comment.ts
+    discover.ts
+    events.ts
+    admin/
+      stories.ts
+      reports.ts
+  components/
+  lib/
+  models/
+  public/
+  styles/
+
+5. DATA MODELS (MONGOOSE)
+
+(Codex should generate these schemas)
+
+5.1 User Model
+User {
+  _id
+  email
+  passwordHash
+  role: "founder" | "supporter" | "admin"
+  displayName
+  avatarUrl
+  country
+  region
+  createdAt
+  updatedAt
+}
+
+5.2 FounderProfile Model
+FounderProfile {
+  _id
+  userId
+  brandName
+  aboutFounder
+  storyHighlights: []
+  nicheCategoryId
+  region
+  stats: {
+    storyCount
+    followersCount
+    profileViews
+  }
+  createdAt
+  updatedAt
+}
+
+5.3 Story Model
+Story {
+  _id
+  authorId
+  founderProfileId
+  text
+  mediaUrls: []
+  nicheCategoryId
+  region
+  likeCount
+  commentCount
+  viewCount
+  createdAt
+  updatedAt
+}
+
+5.4 Comment Model
+Comment {
+  _id
+  storyId
+  authorId
+  text
+  createdAt
+}
+
+5.5 Like Model
+Like {
+  _id
+  userId
+  storyId
+  createdAt
+}
+
+5.6 Follow Model
+Follow {
+  _id
+  followerId
+  followingId
+  createdAt
+}
+
+5.7 Niche Model
+Niche {
+  _id
+  name
+  slug
+}
+
+5.8 Analytics Event Model
+Event {
+  _id
+  userId
+  type
+  targetId
+  metadata
+  createdAt
+}
+
+5.9 Report Model
+Report {
+  _id
+  reporterId
+  targetType
+  targetId
+  reason
+  status
+  createdAt
+}
+
+6. API ENDPOINT SPECIFICATION (CODEX WILL IMPLEMENT)
+AUTH
+POST /api/auth/register
+
+Input:
+
+{ email, password, role }
+
+POST /api/auth/login
+
+Input:
+
+{ email, password }
+
+GET /api/auth/me
+
+Auth required.
+Returns current user.
+
+FOUNDERS
+GET /api/founders
+
+Filters:
+
+?niche=…&region=…&sort=…
+
+GET /api/founders/:id
+POST /api/founders
+
+Create/update founder profile.
+
+STORIES
+GET /api/stories/feed
+
+Query:
+
+?page=1&limit=20&niche=herbal-skincare
+
+POST /api/stories
+
+Body:
+
+{ text, mediaUrls, nicheCategoryId }
+
+GET /api/stories/:id
+POST /api/stories/:id/like
+POST /api/stories/:id/comment
+DISCOVER
+GET /api/discover
+
+Return:
+
+Trending founders
+
+Trending niches
+
+Recently joined
+
+FOLLOWS
+POST /api/follow/:founderId`
+DELETE /api/follow/:founderId`
+ANALYTICS
+**POST /api/events`
+
+Body:
+
+{ type, targetId }
+
+**GET /api/analytics/profile/:founderId`
+ADMIN
+GET /api/admin/stories?status=flagged`
+PATCH /api/admin/stories/:id`
+GET /api/admin/reports`
+7. FRONTEND ROUTE PLAN
+/
+
+Landing page
+
+/feed
+
+Main story feed
+
+/discover
+
+Explore founders
+
+/founders/[id]
+
+Founder profile page
+
+/stories/[id]
+
+Story details page
+
+/auth/login
+
+Login
+
+/auth/register
+
+Register
+
+/me/profile
+
+Edit founder profile
+
+/me/stories
+
+My stories list
+
+/me/analytics
+
+Founder analytics dashboard
+
+/admin
+
+Admin dashboard
+
+8. COMPONENTS TO GENERATE
+UI Components
+
+<StoryCard>
+
+<StoryComposer>
+
+<FounderProfileCard>
+
+<FollowButton>
+
+<NicheFilter>
+
+<RegionFilter>
+
+<CommentList>
+
+<AnalyticsCard>
+
+<AdminTable>
+
+<UploadImageButton>
+
+<NavigationBar>
+
+<MobileBottomNav>
+
+9. SPRINT PLAN (FOR CODEX TO FOLLOW)
+Sprint 1 — Auth + Setup
+
+Setup Next.js project
+
+Install Tailwind
+
+Connect MongoDB
+
+Build Auth APIs
+
+Build Register/Login UI
+
+Sprint 2 — Founder Profiles
+
+Create FounderProfile model
+
+Build profile CRUD API
+
+Build onboarding flow
+
+Build /founders/[id] UI
+
+Sprint 3 — Stories
+
+Build Story model
+
+Build story CRUD endpoints
+
+Build feed UI
+
+Build StoryCard and composer UI
+
+Sprint 4 — Discover + Follows
+
+Create discover endpoint
+
+Build discover UI
+
+Build follow/unfollow endpoints
+
+Add Follow button
+
+Sprint 5 — Analytics + Admin
+
+Track story views
+
+Track profile views
+
+Build analytics UI
+
+Build admin endpoints
+
+Build admin dashboard
+
+Sprint 6 — Polish + Pilot Launch
+
+Fix bugs
+
+Improve mobile UI
+
+Add loading skeletons
+
+Prepare public beta
+
+10. CODEX RULESET
+
+(Codex will follow these instructions while generating code)
+
+Use Next.js 14 App Router OR Pages Router if specified.
+
+Use TypeScript everywhere.
+
+Use Mongoose for database models.
+
+Use TailwindCSS for styling.
+
+Use JWT-based authentication.
+
+Store media using Cloudinary uploads.
+
+Use reusable components for feed, card UI, and forms.
+
+Follow the folder structure specified above.
+
+Every API route must:
+
+Validate input
+
+Check authentication
+
+Return JSON
+
+Avoid unnecessary complexity: MVP only.
